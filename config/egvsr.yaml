@@ -1,0 +1,83 @@
+model:
+  generator: 
+    name: FRNet
+    in_nc: 3
+    out_nc: 3
+    nf: 64
+    nb: 10
+    load_path: ~
+
+  discriminator:
+    name: STNet
+    in_nc: 3
+    tempo_range: 3
+    load_path: ~
+
+train:
+  batch_size: 1
+  test_freq: 5000 # iterations
+  # loss_weights
+  
+  generator:
+    lr: 5e-5
+    beta1: 0.9
+    beta2: 0.999
+    lr_schedule:
+      type: MultiStepLR
+      milestones: [150000, 300000]
+      gamma: 0.5
+    save_path: ~
+  
+  discriminator:
+    lr: 5e-5
+    beta1: 0.9
+    beta2: 0.999
+    lr_schedule:
+      type: MultiStepLR
+      milestones: [150000, 300000]
+      gamma: 0.5
+    save_path: ~
+
+  # criterions
+  pixel_crit:
+    type: CB
+    weight: 1
+    reduction: mean
+
+  warping_crit:
+    type: CB
+    weight: 1
+    reduction: mean
+
+  feature_crit:
+    type: CosineSimilarity
+    weight: 0.2
+    reduction: mean
+    feature_layers: [8, 17, 26, 35]
+
+  pingpong_crit:
+    type: CB
+    weight: 0.5
+    reduction: mean
+
+  gan_crit:
+    type: GAN
+    weight: 0.01
+    reduction: mean
+
+# metric configs
+metric:
+  PSNR:
+    colorspace: y
+    mult: 1.0
+
+  LPIPS:
+    model: net-lin
+    net: alex
+    colorspace: rgb
+    spatial: false
+    version: 0.1
+    mult: 1.0
+
+  tOF:
+    mult: 1.0
